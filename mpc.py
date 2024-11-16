@@ -1,6 +1,9 @@
 import numpy as np
 from scipy.optimize import minimize
 import matplotlib.pyplot as plt
+from matplotlib import rcParams
+# 设置全局字体为 Microsoft YaHei
+rcParams['font.family'] = 'Microsoft YaHei'
 class VehicleMPC:
     """
     车辆模型预测控制器类
@@ -8,8 +11,8 @@ class VehicleMPC:
     """
     def __init__(self):
         # MPC 控制器参数
-        self.dt = 0.1  # 时间步长(秒)
-        self.N = 10    # 预测时域长度(步数)
+        self.dt = 1  # 时间步长(秒)
+        self.N = 19    # 预测时域长度(步数)
         
         # 车辆物理参数
         self.L = 2.7   # 轴距(米)
@@ -101,13 +104,12 @@ class VehicleMPC:
     
 if __name__ == "__main__":
     mpc = VehicleMPC()
-    
     # 初始状态
     current_state = np.array([0, 0, 0])
     
     # 定义总的参考轨迹
     total_steps = 20  # 总仿真步数
-    full_trajectory = np.array([[i*10, i*10, 0] for i in range(total_steps)])
+    full_trajectory = np.array([[i, i, 0] for i in range(total_steps)])
     # 存储历史数据
     state_history = [current_state.copy()]
     control_history = []
@@ -149,12 +151,13 @@ if __name__ == "__main__":
         print(f"当前参考点: x = {ref_trajectory[0][0]:.2f}, y = {ref_trajectory[0][1]:.2f}")
         
         # 打印未来N步的控制序列
-        print("\n预测的控制序列:")
-        for i, u in enumerate(u_sequence):
-            print(f"预测步骤 {i+1}: 速度 = {u[0]:.2f} m/s, 转向角 = {u[1]:.2f} rad")
+        # print("\n预测的控制序列:")
+        # for i, u in enumerate(u_sequence):
+        #     print(f"预测步骤 {i+1}: 速度 = {u[0]:.2f} m/s, 转向角 = {u[1]:.2f} rad")
         
         # 使用运动学模型更新状态
         current_state = current_state + mpc.dt * mpc.vehicle_dynamics(current_state, optimal_control) #这里是真的要优化下一个状态了
+        # 这里dt是状态增长的斜率，应该和参考状态增长的斜率相同，这样的话才更能趋近
         state_history.append(current_state.copy())
 
     # 打印最终结果
@@ -193,4 +196,3 @@ if __name__ == "__main__":
     
     plt.tight_layout()
     plt.show()
-
